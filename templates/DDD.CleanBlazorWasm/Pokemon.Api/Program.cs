@@ -1,14 +1,27 @@
 ﻿using Microsoft.AspNetCore.Hosting.StaticWebAssets;
-using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Pokemon.Api;
+using Pokemon.Application;
+using Pokemon.Infrastructure;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+{
+    builder.Services
+        .AddPresentation()
+        .AddApplication()
+        .AddInfrastructure(builder.Configuration);
+
+    builder.Services.AddControllersWithViews();
+    builder.Services.AddRazorPages();
+
+
+    builder.Host.UseSerilog((context, configuration) =>
+        configuration.ReadFrom.Configuration(context.Configuration));
+}
 
 StaticWebAssetsLoader.UseStaticWebAssets(builder.Environment, builder.Configuration);
 
-// Add services to the container.
-
-builder.Services.AddControllersWithViews();
-builder.Services.AddRazorPages();
 
 var app = builder.Build();
 
@@ -16,24 +29,32 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseWebAssemblyDebugging();
-}
-else
-{
-    app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
+
+        foreach (var description in provider.ApiVersionDescriptions)
+        {
+            options.SwaggerEndpoint(
+                $"/swagger/{description.GroupName}/swagger.json",
+                description.ApiVersion.ToString());
+        }
+    });
 }
 
+app.UseSerilogRequestLogging();
+app.UseExceptionHandler("/error");
 app.UseHttpsRedirection();
-
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers();
+app.UseHsts();
 app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
-
 app.UseRouting();
-
-
 app.MapRazorPages();
-app.MapControllers();
 app.MapFallbackToFile("index.html");
 
 app.Run();
