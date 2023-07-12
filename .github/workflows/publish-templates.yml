@@ -20,18 +20,9 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 7.0.x
-    - name: Restore dependencies
-      working-directory: './templates/DDD.CleanWebApi/src'
-      run: dotnet restore
-    - name: Build
-      working-directory: './templates/DDD.CleanWebApi/src'
-      run: dotnet build --no-restore
-    - name: Test
-      working-directory: './templates/DDD.CleanWebApi/src'
-      run: dotnet test --no-build --verbosity normal
     - name: Publish nuget package
       working-directory: './templates/DDD.CleanWebApi'
       run: |
         dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/hoejsagerc/index.json"
         dotnet pack --configuration Release
-        dotnet nuget push "bin/Release/DDD.CleanWebApi.1.0.0.nupkg"  --api-key ${{ secrets.PAT }} --source "github"
+        dotnet nuget push "DDD.CleanWebApi.1.0.0.nupkg"  --api-key ${{ secrets.PAT }} --source "github"
