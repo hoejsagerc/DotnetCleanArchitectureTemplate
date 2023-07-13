@@ -48,12 +48,12 @@ app.UseSerilogRequestLogging();
 app.UseExceptionHandler("/error");
 app.UseHttpsRedirection();
 app.UseAuthentication();
-app.UseAuthorization();
 app.MapControllers();
 app.UseHsts();
 app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseAuthorization();
 app.MapRazorPages();
 app.MapFallbackToFile("index.html");
 

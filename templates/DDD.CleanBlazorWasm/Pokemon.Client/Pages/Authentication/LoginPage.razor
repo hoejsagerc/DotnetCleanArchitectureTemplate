@@ -1,0 +1,36 @@
+@page "/login"
+@inject ApiClientV1 _client
+
+<PageTitle>Login</PageTitle>
+
+
+<EditForm Model="@loginRequest" OnValidSubmit="OnValidSubmit">
+<DataAnnotationsValidator/>
+<MudGrid>
+    <MudItem xs="12" sm="7">
+        <MudCard>
+            <MudCardContent>
+                <MudTextField Label="Email" Class="mt-3"
+                            @bind-Value="loginRequest.Email" For="@(() => loginRequest.Email)"/>
+                <MudTextField Label="Password" HelperText="Choose a strong password" Class="mt-3"
+                            @bind-Value="loginRequest.Password" For="@(() => loginRequest.Password)" InputType="InputType.Password"/>
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Sign in</MudButton>
+            </MudCardActions>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+</EditForm>
+
+
+@code{
+    private LoginRequest loginRequest = new LoginRequest();
+
+    public async Task<AuthenticationResponse> OnValidSubmit()
+    {
+        AuthenticationResponse authResult = new();
+        authResult = await _client.LoginAsync(loginRequest);
+        return authResult;
+    }
+}

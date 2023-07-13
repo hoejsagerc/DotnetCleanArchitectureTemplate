@@ -34,6 +34,7 @@ public class AuthenticationController : ApiController
     /// <param name="request"></param>
     /// <response code="200">Returns the created user with a valid token</response>
     [HttpPost("register")]
+    [ProducesResponseType(typeof(AuthenticationResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> Register(RegisterRequest request)
     {
         var command = _mapper.Map<RegisterCommand>(request);
@@ -53,6 +54,7 @@ public class AuthenticationController : ApiController
     /// <response code="401">Returns Unauthorized if the credentials is invalid</response>
     /// <response code="404">Returns NotFound if the user does not exist</response>
     [HttpPost("login")]
+    [ProducesResponseType(typeof(AuthenticationResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> Login(LoginRequest request)
     {
         var query = _mapper.Map<LoginQuery>(request);
@@ -79,6 +81,7 @@ public class AuthenticationController : ApiController
     /// <response code="200">Returns the authenticated user with a new valid jwt token</response>
     /// <response code="404">Return not found if either the user does not exist or the refresh token does not exist</response>
     [HttpPost("refresh/{userId}")]
+    [ProducesResponseType(typeof(AuthenticationResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> Refresh(RefreshTokenRequest request, string userId)
     {
         var command = _mapper.Map<RefreshCommand>((request, userId));
