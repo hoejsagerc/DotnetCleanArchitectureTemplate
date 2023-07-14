@@ -24,6 +24,7 @@ public class PocketMonsterController : ApiController
     }
 
     [HttpPost]
+    [ProducesResponseType(typeof(PocketMonsterResponse), StatusCodes.Status201Created)]
     public async Task<IActionResult> CreatePokemon(CreatePocketMonsterRequest request)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -32,12 +33,13 @@ public class PocketMonsterController : ApiController
         var createPokemonResult = await _mediator.Send(command);
 
         return createPokemonResult.Match(
-            pokemon => Ok(_mapper.Map<PocketMonsterResponse>(pokemon)),
+            createPokemonResult => Created("", _mapper.Map<PocketMonsterResponse>(createPokemonResult)),
             errors => Problem(errors));
     }
 
     [HttpGet]
     [Route("{pokemonId}")]
+    [ProducesResponseType(typeof(PocketMonsterResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetPokemonById(string pokemonId)
     {
         var query = _mapper.Map<GetPokemonByIdQuery>(pokemonId);

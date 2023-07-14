@@ -9,6 +9,8 @@ using Pokemon.Application.Authentication.v1.Queries.Login;
 using Pokemon.Application.Authentication.v1.Commands.Refresh;
 using Pokemon.Contracts.v1.Authentication;
 using Pokemon.Domain.Common.DomainErrors;
+using System.Security.Claims;
+using Pokemon.Application.Authentication.v1.Commands.Logout;
 
 namespace Pokemon.Api.Controllers.v1;
 
@@ -32,16 +34,16 @@ public class AuthenticationController : ApiController
     /// Register new user
     /// </summary>
     /// <param name="request"></param>
-    /// <response code="200">Returns the created user with a valid token</response>
+    /// <response code="201">Returns the created user with a valid token</response>
     [HttpPost("register")]
-    [ProducesResponseType(typeof(AuthenticationResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(AuthenticationResponse), StatusCodes.Status201Created)]
     public async Task<IActionResult> Register(RegisterRequest request)
     {
         var command = _mapper.Map<RegisterCommand>(request);
         ErrorOr<AuthenticationResult> authResult = await _mediator.Send(command);
 
         return authResult.Match(
-            authResult => Ok(_mapper.Map<AuthenticationResponse>(authResult)),
+            authResult => Created("", _mapper.Map<AuthenticationResponse>(authResult)),
             errors => Problem(errors));
     }
 
@@ -51,10 +53,9 @@ public class AuthenticationController : ApiController
     /// </summary>
     /// <param name="request"></param>
     /// <response code="200">Returns the authenticated user with a valid token</response>
-    /// <response code="401">Returns Unauthorized if the credentials is invalid</response>
-    /// <response code="404">Returns NotFound if the user does not exist</response>
     [HttpPost("login")]
     [ProducesResponseType(typeof(AuthenticationResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Login(LoginRequest request)
     {
         var query = _mapper.Map<LoginQuery>(request);
@@ -73,15 +74,36 @@ public class AuthenticationController : ApiController
     }
 
 
+    [HttpPost("logout")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> Logout()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId is null)
+        {
+            return Problem(
+                statusCode: StatusCodes.Status401Unauthorized,
+                title: "Unauthorized");
+        }
+
+        var command = _mapper.Map<LogoutCommand>(userId);
+        var result = await _mediator.Send(command);
+
+        return result.Match(
+            result => NoContent(),
+            errors => Problem(errors));
+    }
+
+
     /// <summary>
     /// Refresh users Jwt token
     /// </summary>
     /// <param name="request"></param>
     /// <param name="userId"></param>
-    /// <response code="200">Returns the authenticated user with a new valid jwt token</response>
-    /// <response code="404">Return not found if either the user does not exist or the refresh token does not exist</response>
+    /// <response code="201">Returns the authenticated user with a new valid jwt token</response>
     [HttpPost("refresh/{userId}")]
-    [ProducesResponseType(typeof(AuthenticationResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(AuthenticationResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Refresh(RefreshTokenRequest request, string userId)
     {
         var command = _mapper.Map<RefreshCommand>((request, userId));
@@ -89,7 +111,7 @@ public class AuthenticationController : ApiController
         var refreshTokenResult = await _mediator.Send(command);
 
         return refreshTokenResult.Match(
-            refreshTokenResult => Ok(_mapper.Map<AuthenticationResponse>(refreshTokenResult)),
+            refreshTokenResult => Created("", _mapper.Map<AuthenticationResponse>(refreshTokenResult)),
             errors => Problem(errors));
     }
 }

@@ -8,6 +8,7 @@ using Pokemon.Application.Common.Interfaces.Persistence;
 using Pokemon.Domain.Common.DomainErrors;
 using Pokemon.Domain.AuthenticationAggregates;
 using Pokemon.Domain.AuthenticationAggregates.ValueObjects;
+using Microsoft.Extensions.Configuration;
 
 namespace Pokemon.Application.Authentication.v1.Queries.Login;
 
@@ -18,19 +19,22 @@ public class LoginQueryHandler : IRequestHandler<LoginQuery, ErrorOr<Authenticat
     private readonly ILogger<LoginQueryHandler> _logger;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IRefreshTokenRepository _refreshTokenRepository;
+    private readonly IConfiguration _configuration;
 
     public LoginQueryHandler(
         IUserRepository userRepository,
         IJwtTokenGenerator jwtTokenGenerator,
         ILogger<LoginQueryHandler> logger,
         IHttpContextAccessor httpContextAccessor,
-        IRefreshTokenRepository refreshTokenRepository)
+        IRefreshTokenRepository refreshTokenRepository,
+        IConfiguration configuration)
     {
         _userRepository = userRepository;
         _jwtTokenGenerator = jwtTokenGenerator;
         _logger = logger;
         _httpContextAccessor = httpContextAccessor;
         _refreshTokenRepository = refreshTokenRepository;
+        _configuration = configuration;
     }
 
     public async Task<ErrorOr<AuthenticationResult>> Handle(
@@ -80,7 +84,8 @@ public class LoginQueryHandler : IRequestHandler<LoginQuery, ErrorOr<Authenticat
         var token = _jwtTokenGenerator.GenerateToken(user);
 
         var refreshToken = RefreshToken.Create(
-            DateTime.UtcNow.AddDays(7),
+            DateTime.UtcNow.AddDays(
+                _configuration.GetValue<int>("RefreshTokenSettings:ExpiryDays")),
             UserId.Create(Guid.Parse(user.Id.ToString()!)));
         await _refreshTokenRepository.AddAsync(refreshToken);
 
@@ -93,25 +98,4 @@ public class LoginQueryHandler : IRequestHandler<LoginQuery, ErrorOr<Authenticat
 
         return (token, refreshToken);
     }
-
-
-    // private async Task RevokeOldRefreshToken(User user, string? sourceIpAddress)
-    // {
-    //     var oldRefreshToken = await _refreshTokenRepository.GetByUserIdAsync(
-    //         UserId.Create(Guid.Parse(user.Id.ToString()!)));
-
-    //     if (oldRefreshToken is not null)
-    //     {
-    //         oldRefreshToken.Revoke();
-
-    //         await _refreshTokenRepository.UpdateTokenAsync(oldRefreshToken);
-
-    //         _logger.LogInformation(
-    //             "User refresh token revoked successful, {@RefreshTokenId}, {@UserId}, {@SourceIpAddress}, {@DateTimeUtc}",
-    //             oldRefreshToken.Id,
-    //             user.Id,
-    //             sourceIpAddress,
-    //             DateTime.UtcNow);
-    //     }
-    // }
 }

@@ -4,12 +4,19 @@
 		<TargetFramework>net6.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
+		<DebuggerSupport>true</DebuggerSupport>
+		<CopyOutputSymbolsToPublishDirectory>true</CopyOutputSymbolsToPublishDirectory>
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Blazored.LocalStorage" Version="4.3.0" />
+		<PackageReference Include="FluentValidation" Version="11.6.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="6.0.20" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.7" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.7" PrivateAssets="all" />
+		<PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0" />
 		<PackageReference Include="MudBlazor" Version="6.0.13" />
+		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.32.0" />
 	</ItemGroup>
 
 </Project>

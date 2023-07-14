@@ -20,7 +20,7 @@ public class RegisterCommandHandler :
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
     private readonly ILogger<RegisterCommandHandler> _logger;
     private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IConfiguration _configuraion;
+    private readonly IConfiguration _configuration;
 
     public RegisterCommandHandler(
         IUserRepository userRepository,
@@ -28,14 +28,14 @@ public class RegisterCommandHandler :
         ILogger<RegisterCommandHandler> logger,
         IHttpContextAccessor httpContextAccessor,
         IRefreshTokenRepository refreshTokenRepository,
-        IConfiguration configuraion)
+        IConfiguration configuration)
     {
         _userRepository = userRepository;
         _jwtTokenGenerator = jwtTokenGenerator;
         _logger = logger;
         _httpContextAccessor = httpContextAccessor;
         _refreshTokenRepository = refreshTokenRepository;
-        _configuraion = configuraion;
+        _configuration = configuration;
     }
 
     public async Task<ErrorOr<AuthenticationResult>> Handle(
@@ -82,7 +82,7 @@ public class RegisterCommandHandler :
     {
         var refreshToken = RefreshToken.Create(
             DateTime.UtcNow.AddDays(
-                _configuraion.GetValue<int>("RefreshTokenSettings:ExpiryDays")),
+                _configuration.GetValue<int>("RefreshTokenSettings:ExpiryDays")),
             UserId.Create(user.Id.Value));
 
         await _refreshTokenRepository.AddAsync(refreshToken);

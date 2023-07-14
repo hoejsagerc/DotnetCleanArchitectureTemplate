@@ -1,4 +1,5 @@
 ﻿@inherits LayoutComponentBase
+@using Pokemon.Client.Shared.Authentication
 
 <MudThemeProvider />
 <MudDialogProvider />
@@ -10,6 +11,7 @@
         <MudSpacer />
         <MudIconButton Icon="@Icons.Custom.Brands.MudBlazor" Color="Color.Inherit" Link="https://mudblazor.com/" Target="_blank" />
         <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Link="https://github.com/MudBlazor/MudBlazor/" Target="_blank" />
+        <LoginButtonComponent />
     </MudAppBar>
     <MudDrawer @bind-Open="_drawerOpen" Elevation="1">
         <MudDrawerHeader>
@@ -18,17 +20,26 @@
         <NavMenu />
     </MudDrawer>
     <MudMainContent>
-        <MudContainer MaxWidth="MaxWidth.Large" Class="my-16 pt-16">
-            @Body
-        </MudContainer>
+        <ErrorBoundary @ref="@errorBoundary" Context="Exception">
+            <ChildContent>
+                @Body
+            </ChildContent>
+            <ErrorContent>
+                <MudAlert Severity="Severity.Error" ShowCloseIcon="true" CloseIconClicked="@errorBoundary.Recover" ContentAlignment="HorizontalAlignment.Center">
+                    @Exception.GetType(): @Exception.Message
+                </MudAlert>
+            </ErrorContent>
+        </ErrorBoundary>
     </MudMainContent>
 </MudLayout>
 
 @code {
     bool _drawerOpen = true;
+    private ErrorBoundary errorBoundary;
 
     void DrawerToggle()
     {
         _drawerOpen = !_drawerOpen;
     }
+
 }

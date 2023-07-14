@@ -1,4 +1,5 @@
 using Mapster;
+using Pokemon.Application.Authentication.v1.Commands.Logout;
 using Pokemon.Application.Authentication.v1.Commands.Refresh;
 using Pokemon.Application.Authentication.v1.Commands.Register;
 using Pokemon.Application.Authentication.v1.Common;
@@ -14,6 +15,9 @@ public class AuthenticationMappingConfig : IRegister
         config.NewConfig<RegisterRequest, RegisterCommand>();
 
         config.NewConfig<LoginRequest, LoginQuery>();
+
+        config.NewConfig<string, LogoutCommand>()
+            .MapWith(src => new LogoutCommand(src));
 
         config.NewConfig<(RefreshTokenRequest Request, string UserId), RefreshCommand>()
             .Map(dest => dest.UserId, src => src.UserId)

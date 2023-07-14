@@ -32,7 +32,10 @@ public sealed class RefreshToken : Entity<RefreshTokenId>, IAuditableEntity
     public static RefreshToken Create(DateTime expires, UserId userId)
     {
         var tokenSignature = Convert.ToBase64String(
-            RandomNumberGenerator.GetBytes(64));
+            RandomNumberGenerator.GetBytes(64))
+                .Replace('+', '-')
+                .Replace('/', '-')
+                .TrimEnd('=');
 
         var token = new RefreshToken(
             token: tokenSignature,

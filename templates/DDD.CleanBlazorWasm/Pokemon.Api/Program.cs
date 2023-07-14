@@ -4,6 +4,7 @@ using Pokemon.Api;
 using Pokemon.Application;
 using Pokemon.Infrastructure;
 using Serilog;
+using Serilog.Events;
 
 var builder = WebApplication.CreateBuilder(args);
 {
@@ -44,8 +45,22 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseSerilogRequestLogging();
-app.UseExceptionHandler("/error");
+app.UseSerilogRequestLogging(options =>
+{
+    options.MessageTemplate = "{RemoteIpAddress} {RequestScheme} {RequestHost} {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.0000} ms";
+
+    // Emit debug-level events instead of the defaults
+    options.GetLevel = (httpContext, elapsed, ex) => LogEventLevel.Debug;
+
+    // Attach additional properties to the request completion event
+    options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
+    {
+        diagnosticContext.Set("RequestHost", httpContext.Request.Host.Value);
+        diagnosticContext.Set("RequestScheme", httpContext.Request.Scheme);
+        diagnosticContext.Set("RemoteIpAddress", httpContext.Connection.RemoteIpAddress);
+    };
+});
+app.UseExceptionHandler("/errors");
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.MapControllers();

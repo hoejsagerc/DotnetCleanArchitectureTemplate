@@ -19,57 +19,7 @@ namespace Pokemon.Client.Services.v1
     using System = global::System;
 
     [System.CodeDom.Compiler.GeneratedCode("NSwag", "13.19.0.0 (NJsonSchema v10.9.0.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial interface IApiClientV1
-    {
-        /// <returns>Success</returns>
-        /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<AuthenticationResponse> RegisterAsync(RegisterRequest body);
-
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <returns>Success</returns>
-        /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<AuthenticationResponse> RegisterAsync(RegisterRequest body, System.Threading.CancellationToken cancellationToken);
-
-        /// <returns>Success</returns>
-        /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<AuthenticationResponse> LoginAsync(LoginRequest body);
-
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <returns>Success</returns>
-        /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<AuthenticationResponse> LoginAsync(LoginRequest body, System.Threading.CancellationToken cancellationToken);
-
-        /// <returns>Success</returns>
-        /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<AuthenticationResponse> RefreshAsync(string userId, RefreshTokenRequest body);
-
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <returns>Success</returns>
-        /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<AuthenticationResponse> RefreshAsync(string userId, RefreshTokenRequest body, System.Threading.CancellationToken cancellationToken);
-
-        /// <returns>Success</returns>
-        /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task CreatePokemonAsync(CreatePocketMonsterRequest body);
-
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <returns>Success</returns>
-        /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task CreatePokemonAsync(CreatePocketMonsterRequest body, System.Threading.CancellationToken cancellationToken);
-
-        /// <returns>Success</returns>
-        /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task GetPokemonByIdAsync(string pokemonId);
-
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <returns>Success</returns>
-        /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task GetPokemonByIdAsync(string pokemonId, System.Threading.CancellationToken cancellationToken);
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NSwag", "13.19.0.0 (NJsonSchema v10.9.0.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class ApiClientV1 : IApiClientV1
+    public partial class ApiClientV1 
     {
         private string _baseUrl = "";
         private System.Net.Http.HttpClient _httpClient;
@@ -103,7 +53,7 @@ namespace Pokemon.Client.Services.v1
         partial void PrepareRequest(System.Net.Http.HttpClient client, System.Net.Http.HttpRequestMessage request, System.Text.StringBuilder urlBuilder);
         partial void ProcessResponse(System.Net.Http.HttpClient client, System.Net.Http.HttpResponseMessage response);
 
-        /// <returns>Success</returns>
+        /// <returns>Created</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
         public virtual System.Threading.Tasks.Task<AuthenticationResponse> RegisterAsync(RegisterRequest body)
         {
@@ -111,7 +61,7 @@ namespace Pokemon.Client.Services.v1
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <returns>Success</returns>
+        /// <returns>Created</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
         public virtual async System.Threading.Tasks.Task<AuthenticationResponse> RegisterAsync(RegisterRequest body, System.Threading.CancellationToken cancellationToken)
         {
@@ -152,7 +102,7 @@ namespace Pokemon.Client.Services.v1
                         ProcessResponse(client_, response_);
 
                         var status_ = (int)response_.StatusCode;
-                        if (status_ == 200)
+                        if (status_ == 201)
                         {
                             var objectResponse_ = await ReadObjectResponseAsync<AuthenticationResponse>(response_, headers_, cancellationToken).ConfigureAwait(false);
                             if (objectResponse_.Object == null)
@@ -240,6 +190,16 @@ namespace Pokemon.Client.Services.v1
                             return objectResponse_.Object;
                         }
                         else
+                        if (status_ == 401)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("Unauthorized", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
                         {
                             var responseData_ = response_.Content == null ? null : await response_.Content.ReadAsStringAsync().ConfigureAwait(false);
                             throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
@@ -259,7 +219,76 @@ namespace Pokemon.Client.Services.v1
             }
         }
 
-        /// <returns>Success</returns>
+        /// <returns>No Content</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        public virtual System.Threading.Tasks.Task LogoutAsync()
+        {
+            return LogoutAsync(System.Threading.CancellationToken.None);
+        }
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <returns>No Content</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        public virtual async System.Threading.Tasks.Task LogoutAsync(System.Threading.CancellationToken cancellationToken)
+        {
+            var urlBuilder_ = new System.Text.StringBuilder();
+            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/api/v1/auth/logout");
+
+            var client_ = _httpClient;
+            var disposeClient_ = false;
+            try
+            {
+                using (var request_ = new System.Net.Http.HttpRequestMessage())
+                {
+                    request_.Content = new System.Net.Http.StringContent(string.Empty, System.Text.Encoding.UTF8, "application/json");
+                    request_.Method = new System.Net.Http.HttpMethod("POST");
+
+                    PrepareRequest(client_, request_, urlBuilder_);
+
+                    var url_ = urlBuilder_.ToString();
+                    request_.RequestUri = new System.Uri(url_, System.UriKind.RelativeOrAbsolute);
+
+                    PrepareRequest(client_, request_, url_);
+
+                    var response_ = await client_.SendAsync(request_, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+                    var disposeResponse_ = true;
+                    try
+                    {
+                        var headers_ = System.Linq.Enumerable.ToDictionary(response_.Headers, h_ => h_.Key, h_ => h_.Value);
+                        if (response_.Content != null && response_.Content.Headers != null)
+                        {
+                            foreach (var item_ in response_.Content.Headers)
+                                headers_[item_.Key] = item_.Value;
+                        }
+
+                        ProcessResponse(client_, response_);
+
+                        var status_ = (int)response_.StatusCode;
+                        if (status_ == 204)
+                        {
+                            return;
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await response_.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
+                    }
+                    finally
+                    {
+                        if (disposeResponse_)
+                            response_.Dispose();
+                    }
+                }
+            }
+            finally
+            {
+                if (disposeClient_)
+                    client_.Dispose();
+            }
+        }
+
+        /// <returns>Created</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
         public virtual System.Threading.Tasks.Task<AuthenticationResponse> RefreshAsync(string userId, RefreshTokenRequest body)
         {
@@ -267,7 +296,7 @@ namespace Pokemon.Client.Services.v1
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <returns>Success</returns>
+        /// <returns>Created</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
         public virtual async System.Threading.Tasks.Task<AuthenticationResponse> RefreshAsync(string userId, RefreshTokenRequest body, System.Threading.CancellationToken cancellationToken)
         {
@@ -312,9 +341,97 @@ namespace Pokemon.Client.Services.v1
                         ProcessResponse(client_, response_);
 
                         var status_ = (int)response_.StatusCode;
-                        if (status_ == 200)
+                        if (status_ == 201)
                         {
                             var objectResponse_ = await ReadObjectResponseAsync<AuthenticationResponse>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            return objectResponse_.Object;
+                        }
+                        else
+                        if (status_ == 400)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("Bad Request", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await response_.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
+                    }
+                    finally
+                    {
+                        if (disposeResponse_)
+                            response_.Dispose();
+                    }
+                }
+            }
+            finally
+            {
+                if (disposeClient_)
+                    client_.Dispose();
+            }
+        }
+
+        /// <returns>Created</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        public virtual System.Threading.Tasks.Task<PocketMonsterResponse> CreatePokemonAsync(CreatePocketMonsterRequest body)
+        {
+            return CreatePokemonAsync(body, System.Threading.CancellationToken.None);
+        }
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <returns>Created</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        public virtual async System.Threading.Tasks.Task<PocketMonsterResponse> CreatePokemonAsync(CreatePocketMonsterRequest body, System.Threading.CancellationToken cancellationToken)
+        {
+            var urlBuilder_ = new System.Text.StringBuilder();
+            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/api/v1/pokemon");
+
+            var client_ = _httpClient;
+            var disposeClient_ = false;
+            try
+            {
+                using (var request_ = new System.Net.Http.HttpRequestMessage())
+                {
+                    var json_ = System.Text.Json.JsonSerializer.Serialize(body, _settings.Value);
+                    var content_ = new System.Net.Http.StringContent(json_);
+                    content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json");
+                    request_.Content = content_;
+                    request_.Method = new System.Net.Http.HttpMethod("POST");
+                    request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
+
+                    PrepareRequest(client_, request_, urlBuilder_);
+
+                    var url_ = urlBuilder_.ToString();
+                    request_.RequestUri = new System.Uri(url_, System.UriKind.RelativeOrAbsolute);
+
+                    PrepareRequest(client_, request_, url_);
+
+                    var response_ = await client_.SendAsync(request_, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+                    var disposeResponse_ = true;
+                    try
+                    {
+                        var headers_ = System.Linq.Enumerable.ToDictionary(response_.Headers, h_ => h_.Key, h_ => h_.Value);
+                        if (response_.Content != null && response_.Content.Headers != null)
+                        {
+                            foreach (var item_ in response_.Content.Headers)
+                                headers_[item_.Key] = item_.Value;
+                        }
+
+                        ProcessResponse(client_, response_);
+
+                        var status_ = (int)response_.StatusCode;
+                        if (status_ == 201)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<PocketMonsterResponse>(response_, headers_, cancellationToken).ConfigureAwait(false);
                             if (objectResponse_.Object == null)
                             {
                                 throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
@@ -343,79 +460,7 @@ namespace Pokemon.Client.Services.v1
 
         /// <returns>Success</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task CreatePokemonAsync(CreatePocketMonsterRequest body)
-        {
-            return CreatePokemonAsync(body, System.Threading.CancellationToken.None);
-        }
-
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <returns>Success</returns>
-        /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task CreatePokemonAsync(CreatePocketMonsterRequest body, System.Threading.CancellationToken cancellationToken)
-        {
-            var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/api/v1/pokemon");
-
-            var client_ = _httpClient;
-            var disposeClient_ = false;
-            try
-            {
-                using (var request_ = new System.Net.Http.HttpRequestMessage())
-                {
-                    var json_ = System.Text.Json.JsonSerializer.Serialize(body, _settings.Value);
-                    var content_ = new System.Net.Http.StringContent(json_);
-                    content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json");
-                    request_.Content = content_;
-                    request_.Method = new System.Net.Http.HttpMethod("POST");
-
-                    PrepareRequest(client_, request_, urlBuilder_);
-
-                    var url_ = urlBuilder_.ToString();
-                    request_.RequestUri = new System.Uri(url_, System.UriKind.RelativeOrAbsolute);
-
-                    PrepareRequest(client_, request_, url_);
-
-                    var response_ = await client_.SendAsync(request_, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
-                    var disposeResponse_ = true;
-                    try
-                    {
-                        var headers_ = System.Linq.Enumerable.ToDictionary(response_.Headers, h_ => h_.Key, h_ => h_.Value);
-                        if (response_.Content != null && response_.Content.Headers != null)
-                        {
-                            foreach (var item_ in response_.Content.Headers)
-                                headers_[item_.Key] = item_.Value;
-                        }
-
-                        ProcessResponse(client_, response_);
-
-                        var status_ = (int)response_.StatusCode;
-                        if (status_ == 200)
-                        {
-                            return;
-                        }
-                        else
-                        {
-                            var responseData_ = response_.Content == null ? null : await response_.Content.ReadAsStringAsync().ConfigureAwait(false);
-                            throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
-                        }
-                    }
-                    finally
-                    {
-                        if (disposeResponse_)
-                            response_.Dispose();
-                    }
-                }
-            }
-            finally
-            {
-                if (disposeClient_)
-                    client_.Dispose();
-            }
-        }
-
-        /// <returns>Success</returns>
-        /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task GetPokemonByIdAsync(string pokemonId)
+        public virtual System.Threading.Tasks.Task<PocketMonsterResponse> GetPokemonByIdAsync(string pokemonId)
         {
             return GetPokemonByIdAsync(pokemonId, System.Threading.CancellationToken.None);
         }
@@ -423,7 +468,7 @@ namespace Pokemon.Client.Services.v1
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>Success</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task GetPokemonByIdAsync(string pokemonId, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<PocketMonsterResponse> GetPokemonByIdAsync(string pokemonId, System.Threading.CancellationToken cancellationToken)
         {
             if (pokemonId == null)
                 throw new System.ArgumentNullException("pokemonId");
@@ -439,6 +484,7 @@ namespace Pokemon.Client.Services.v1
                 using (var request_ = new System.Net.Http.HttpRequestMessage())
                 {
                     request_.Method = new System.Net.Http.HttpMethod("GET");
+                    request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -463,7 +509,12 @@ namespace Pokemon.Client.Services.v1
                         var status_ = (int)response_.StatusCode;
                         if (status_ == 200)
                         {
-                            return;
+                            var objectResponse_ = await ReadObjectResponseAsync<PocketMonsterResponse>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            return objectResponse_.Object;
                         }
                         else
                         {
@@ -583,6 +634,22 @@ namespace Pokemon.Client.Services.v1
             var result = System.Convert.ToString(value, cultureInfo);
             return result == null ? "" : result;
         }
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "13.19.0.0 (NJsonSchema v10.9.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class AbilityResponse
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("id")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        public string Id { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("name")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        public string Name { get; set; }
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "13.19.0.0 (NJsonSchema v10.9.0.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -867,6 +934,33 @@ namespace Pokemon.Client.Services.v1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "13.19.0.0 (NJsonSchema v10.9.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class EvolutionResponse
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("id")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        public string Id { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("name")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        public string Name { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "13.19.0.0 (NJsonSchema v10.9.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class HttpValidationProblemDetails : ProblemDetails
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("errors")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        public System.Collections.Generic.IDictionary<string, System.Collections.Generic.ICollection<string>> Errors { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "13.19.0.0 (NJsonSchema v10.9.0.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class LoginRequest
     {
 
@@ -879,6 +973,150 @@ namespace Pokemon.Client.Services.v1
 
         [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
         public string Password { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "13.19.0.0 (NJsonSchema v10.9.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class MoveResponse
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("id")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        public string Id { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("name")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        public string Name { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("description")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        public string Description { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("damage")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        public float Damage { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("criticalHitFactor")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        public float CriticalHitFactor { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("criticalHitChance")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        public float CriticalHitChance { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "13.19.0.0 (NJsonSchema v10.9.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class PocketMonsterResponse
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("id")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        public string Id { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("name")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        public string Name { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("type")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        public string Type { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("height")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        public int Height { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("weight")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        public int Weight { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("experience")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        public int Experience { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("experienceToNextLevel")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        public int ExperienceToNextLevel { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("sprite")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        public string Sprite { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("moves")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        public System.Collections.Generic.ICollection<MoveResponse> Moves { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("stats")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        public System.Collections.Generic.ICollection<StatResponse> Stats { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("abilities")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        public System.Collections.Generic.ICollection<AbilityResponse> Abilities { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("evolutions")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        public System.Collections.Generic.ICollection<EvolutionResponse> Evolutions { get; set; }
+
+    }
+
+    [JsonInheritanceConverter(typeof(ProblemDetails), "TypeName")]
+    [JsonInheritanceAttribute("HttpValidationProblemDetails", typeof(HttpValidationProblemDetails))]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "13.19.0.0 (NJsonSchema v10.9.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class ProblemDetails
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("type")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        public string Type { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("title")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        public string Title { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("status")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        public int? Status { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("detail")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        public string Detail { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("instance")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        public string Instance { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
 
     }
 
@@ -929,6 +1167,163 @@ namespace Pokemon.Client.Services.v1
         [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
         public string Password { get; set; }
 
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "13.19.0.0 (NJsonSchema v10.9.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class StatResponse
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("id")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        public string Id { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("name")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        public string Name { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("baseStat")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        public int BaseStat { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("effort")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        public int Effort { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "13.19.0.0 (NJsonSchema v10.9.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Interface, AllowMultiple = true)]
+    internal class JsonInheritanceAttribute : System.Attribute
+    {
+        public JsonInheritanceAttribute(string key, System.Type type)
+        {
+            Key = key;
+            Type = type;
+        }
+
+        public string Key { get; }
+
+        public System.Type Type { get; }
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "13.19.0.0 (NJsonSchema v10.9.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    internal class JsonInheritanceConverterAttribute : System.Text.Json.Serialization.JsonConverterAttribute
+    {
+        public string DiscriminatorName { get; }
+
+        public JsonInheritanceConverterAttribute(System.Type baseType, string discriminatorName = "discriminator")
+            : base(typeof(JsonInheritanceConverter<>).MakeGenericType(baseType))
+        {
+            DiscriminatorName = discriminatorName;
+        }
+    }
+
+    public class JsonInheritanceConverter<TBase> : System.Text.Json.Serialization.JsonConverter<TBase>
+    {
+        private readonly string _discriminatorName;
+
+        public JsonInheritanceConverter()
+        {
+            var attribute = System.Reflection.CustomAttributeExtensions.GetCustomAttribute<JsonInheritanceConverterAttribute>(typeof(TBase));
+            _discriminatorName = attribute?.DiscriminatorName ?? "discriminator";
+        }
+
+        public JsonInheritanceConverter(string discriminatorName)
+        {
+            _discriminatorName = discriminatorName;
+        }
+
+        public string DiscriminatorName { get { return _discriminatorName; } }
+
+        public override TBase Read(ref System.Text.Json.Utf8JsonReader reader, System.Type typeToConvert, System.Text.Json.JsonSerializerOptions options)
+        {
+            var document = System.Text.Json.JsonDocument.ParseValue(ref reader);
+            var hasDiscriminator = document.RootElement.TryGetProperty(_discriminatorName, out var discriminator);
+            var subtype = GetDiscriminatorType(document.RootElement, typeToConvert, hasDiscriminator ? discriminator.GetString() : null);
+
+            var bufferWriter = new System.IO.MemoryStream();
+            using (var writer = new System.Text.Json.Utf8JsonWriter(bufferWriter))
+            {
+                document.RootElement.WriteTo(writer);
+            }
+
+            return (TBase)System.Text.Json.JsonSerializer.Deserialize(bufferWriter.ToArray(), subtype, options);
+        }
+
+        public override void Write(System.Text.Json.Utf8JsonWriter writer, TBase value, System.Text.Json.JsonSerializerOptions options)
+        {
+            writer.WriteStartObject();
+            writer.WriteString(_discriminatorName, GetDiscriminatorValue(value.GetType()));
+
+            var bytes = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes((object)value, options);
+            var document = System.Text.Json.JsonDocument.Parse(bytes);
+            foreach (var property in document.RootElement.EnumerateObject())
+            {
+                property.WriteTo(writer);
+            }
+
+            writer.WriteEndObject();
+        }
+
+        public string GetDiscriminatorValue(System.Type type)
+        {
+            var jsonInheritanceAttributeDiscriminator = GetSubtypeDiscriminator(type);
+            if (jsonInheritanceAttributeDiscriminator != null)
+            {
+                return jsonInheritanceAttributeDiscriminator;
+            }
+
+            return type.Name;
+        }
+
+        protected System.Type GetDiscriminatorType(System.Text.Json.JsonElement jObject, System.Type objectType, string discriminatorValue)
+        {
+            var jsonInheritanceAttributeSubtype = GetObjectSubtype(objectType, discriminatorValue);
+            if (jsonInheritanceAttributeSubtype != null)
+            {
+                return jsonInheritanceAttributeSubtype;
+            }
+
+            if (objectType.Name == discriminatorValue)
+            {
+                return objectType;
+            }
+
+            var typeName = objectType.Namespace + "." + discriminatorValue;
+            var subtype = System.Reflection.IntrospectionExtensions.GetTypeInfo(objectType).Assembly.GetType(typeName);
+            if (subtype != null)
+            {
+                return subtype;
+            }
+
+            throw new System.InvalidOperationException("Could not find subtype of '" + objectType.Name + "' with discriminator '" + discriminatorValue + "'.");
+        }
+
+        private System.Type GetObjectSubtype(System.Type objectType, string discriminator)
+        {
+            foreach (var attribute in System.Reflection.CustomAttributeExtensions.GetCustomAttributes<JsonInheritanceAttribute>(System.Reflection.IntrospectionExtensions.GetTypeInfo(objectType), true))
+            {
+                if (attribute.Key == discriminator)
+                    return attribute.Type;
+            }
+
+            return objectType;
+        }
+
+        private string GetSubtypeDiscriminator(System.Type objectType)
+        {
+            foreach (var attribute in System.Reflection.CustomAttributeExtensions.GetCustomAttributes<JsonInheritanceAttribute>(System.Reflection.IntrospectionExtensions.GetTypeInfo(objectType), true))
+            {
+                if (attribute.Type == objectType)
+                    return attribute.Key;
+            }
+
+            return objectType.Name;
+        }
     }
 
 

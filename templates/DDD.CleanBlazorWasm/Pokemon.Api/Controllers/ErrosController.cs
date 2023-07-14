@@ -5,7 +5,7 @@ namespace Pokemon.Api.Controllers;
 
 public class ErrorsController : ControllerBase
 {
-    [Route("error")]
+    [Route("errors")]
     public IActionResult Error()
     {
         Exception? exception = HttpContext.Features.Get<IExceptionHandlerFeature>()?.Error;
