@@ -1,0 +1,99 @@
+@inject IAuthClient _authClient
+@inject AuthenticationStateProvider _authProvider
+@inject ILocalStorageService _localStorage
+@inject NavigationManager _navigationManager
+@inject ISnackbar _snackbar
+@using System.Text.RegularExpressions
+@using System.ComponentModel.DataAnnotations
+
+
+<MudCard>
+    <MudForm Model="@registerRequest" @ref="@form" ValidationDelay="0" @bind-IsValid="@success" @bind-Errors="@errors">
+        <MudCardContent>
+                <MudTextField Label="Username"
+                            @bind-Value="registerRequest.Username" For="@(() => registerRequest.Username)"
+                            Immediate="true" Required="true" RequiredError="User name is required!" />
+
+                <MudTextField Label="Firstname" Class="mt-3"
+                            @bind-Value="registerRequest.Firstname" For="@(() => registerRequest.Firstname)"
+                            Immediate="true" Required="true" RequiredError="User name is required!" />
+
+                <MudTextField Label="Lastname" Class="mt-3"
+                            @bind-Value="registerRequest.Lastname" For="@(() => registerRequest.Lastname)"
+                            Immediate="true" Required="true" RequiredError="User name is required!" />
+
+                <MudTextField Label="Email" Class="mt-3"
+                            @bind-Value="registerRequest.Email" For="@(() => registerRequest.Email)"
+                            Immediate="true" Required="true" RequiredError="Email is required"/>
+
+                <MudTextField Label="Password" HelperText="Choose a strong password" Class="mt-3" Validation="@(new Func<string, IEnumerable<string>>(PasswordStrength))"
+                            @bind-Value="registerRequest.Password" For="@(() => registerRequest.Password)"
+                            Immediate="true" InputType="InputType.Password" Required="true" RequiredError="Password is required"/>
+
+                <MudTextField Label="Password" HelperText="Repeat the password" Class="mt-3" Validation="@(new Func<string, string>(PasswordMatch))"
+                            For="@(() => registerRequest.Password)" InputType="InputType.Password"
+                            Immediate="true" Required="true" RequiredError="Password is required"/>
+        </MudCardContent>
+        <MudCardActions>
+            <MudButton Variant="Variant.Filled" Disabled="@(!success)" Color="Color.Primary" Class="ml-auto" OnClick="@(async () => await Submit())">Register</MudButton>
+        </MudCardActions>
+    </MudForm>
+</MudCard>
+
+
+@code{
+    MudForm form = new MudForm();
+    private RegisterRequest registerRequest = new();
+    private ServiceResponse<AuthenticationResponse>? response { get; set; }
+
+    bool success;
+    string[] errors = {};
+
+    public async Task Submit()
+    {
+        await form.Validate();
+
+        if (form.IsValid)
+        {
+
+            response = await _authClient.RegisterAsync(registerRequest);
+
+            if (response.Data is not null && response.StatusCode == 201)
+            {
+                await _authProvider.GetAuthenticationStateAsync();
+
+                _navigationManager.NavigateTo("/");
+            }
+            else{
+                _snackbar.Add("Critical Error - Failed registering user", Severity.Error);
+            }
+
+        }
+    }
+
+    private IEnumerable<string> PasswordStrength(string pw)
+    {
+        if (string.IsNullOrWhiteSpace(pw))
+        {
+            yield return "Password is required!";
+            yield break;
+        }
+        if (pw.Length < 8)
+            yield return "Password must be at least of length 8";
+        if (!Regex.IsMatch(pw, @"[A-Z]"))
+            yield return "Password must contain at least one capital letter";
+        if (!Regex.IsMatch(pw, @"[a-z]"))
+            yield return "Password must contain at least one lowercase letter";
+        if (!Regex.IsMatch(pw, @"[0-9]"))
+            yield return "Password must contain at least one digit";
+    }
+
+    private string? PasswordMatch(string arg)
+    {
+        if (registerRequest.Password != arg)
+        {
+            return "Passwords don't match";
+        }
+        return null;
+    }
+}

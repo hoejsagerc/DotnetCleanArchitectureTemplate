@@ -1,0 +1,20 @@
+@page "/login"
+
+<PageTitle>Login</PageTitle>
+
+<MudContainer Class="m-10">
+    <MudGrid>
+        <MudItem xs="6"></MudItem>
+        <MudItem xs="6">
+            <MudText Type="Typo.h2">Login</MudText>
+        </MudItem>
+        <MudItem xs="6">
+            <MudImage Fluid="true" Src="images/authentication/login-img.jpg" Alt="Login image"/>
+        </MudItem>
+        <MudItem xs="6">
+            <LoginFormComponent />
+        </MudItem>
+    </MudGrid>
+</MudContainer>
+
+@code{}

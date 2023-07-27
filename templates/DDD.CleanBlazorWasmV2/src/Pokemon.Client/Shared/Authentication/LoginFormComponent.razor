@@ -1,0 +1,55 @@
+@inject IAuthClient _authClient
+@inject AuthenticationStateProvider _authProvider
+@inject ILocalStorageService _localStorage
+@inject NavigationManager _navigationManager
+@inject ISnackbar _snackbar
+
+
+<MudCard>
+    <MudForm Model="@loginRequest" @ref="@form" @bind-IsValid="@success" ValidationDelay="0">
+        <MudCardContent>
+            <MudTextField Label="Email" Class="mt-3" Immediate="true" HelperText="Enter your email"
+                        @bind-Value="loginRequest.Email" For="@(() => loginRequest.Email)" Required="true" RequiredError="Email is required"
+                        InputType="InputType.Email" />
+
+            <MudTextField Label="Password" HelperText="Enter your password" Class="mt-3" Immediate="true"
+                        @bind-Value="loginRequest.Password" For="@(() => loginRequest.Password)" InputType="InputType.Password" Required="true" RequiredError="Password is required"/>
+        </MudCardContent>
+        <MudCardActions>
+            <MudButton Variant="Variant.Filled" Disabled="@(!success)" Color="Color.Primary" Class="ml-auto"
+                        OnClick="@(async () => await Submit())">Login</MudButton>
+        </MudCardActions>
+    </MudForm>
+</MudCard>
+
+
+@code{
+    MudForm form = new MudForm();
+    LoginRequest loginRequest = new();
+    private ServiceResponse<AuthenticationResponse>? response { get; set; }
+    private AuthenticationResponse? authResult { get; set; }
+    bool success;
+
+    public async Task Submit()
+    {
+        await form.Validate();
+
+        if (form.IsValid)
+        {
+            response = await _authClient.LoginAsync(loginRequest);
+            if (response.Data is not null && response.StatusCode == 200)
+            {
+                _snackbar.Add("Successfully logged in", Severity.Success);
+                await _authProvider.GetAuthenticationStateAsync();
+                _navigationManager.NavigateTo("/", true);
+            }
+            else if (response is not null && response.StatusCode == 401)
+            {
+                _snackbar.Add("Login failed - invalid credentials", Severity.Warning);
+            }
+            else {
+                _snackbar.Add("Critical Error - An unforseen error occured", Severity.Error);
+            }
+        }
+    }
+}

@@ -1,0 +1,33 @@
+@inject NavigationManager _navigationManager
+@inject ILocalStorageService _localStorage
+@inject AuthenticationStateProvider _authProvider
+@inject ISnackbar _snackbar
+@inject IAuthClient _authClient
+
+<AuthorizeView>
+    <Authorized>
+        <MudButton OnClick="Logout" Variant="Variant.Filled" Color="Color.Secondary">Logout</MudButton>
+    </Authorized>
+    <NotAuthorized>
+        <MudButton OnClick="Login" Variant="Variant.Filled" Color="Color.Success">Login</MudButton>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+
+    private void Login()
+    {
+        _navigationManager.NavigateTo("/login");
+    }
+
+    private async Task Logout()
+    {
+        await _authClient.LogoutAsync();
+        await _localStorage.RemoveItemAsync("jwtToken");
+        await _localStorage.RemoveItemAsync("refreshToken");
+        await _authProvider.GetAuthenticationStateAsync();
+        _navigationManager.NavigateTo("/login", true);
+        _snackbar.Clear();
+        _snackbar.Add("Successfully logged out", Severity.Normal);
+    }
+}
