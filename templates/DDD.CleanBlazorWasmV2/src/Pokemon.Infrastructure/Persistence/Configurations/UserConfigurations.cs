@@ -1,5 +1,6 @@
 using System.Data.Common;
 using System.Numerics;
+using System.Runtime.Intrinsics.Arm;
 using System.Runtime.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -14,25 +15,25 @@ public class UserConfigurations : IEntityTypeConfiguration<User>
     public void Configure(EntityTypeBuilder<User> builder)
     {
         ConfigureUsersTable(builder);
-        ConfigureFriendIdsTable(builder);
+        ConfigureUserRoleClaimIdsTable(builder);
     }
 
-    private static void ConfigureFriendIdsTable(EntityTypeBuilder<User> builder)
+    private static void ConfigureUserRoleClaimIdsTable(EntityTypeBuilder<User> builder)
     {
-        builder.OwnsMany(f => f.FriendIds, fb =>
+        builder.OwnsMany(c => c.RoleClaimIds, rc =>
         {
-            fb.ToTable("FriendIds");
+            rc.ToTable("UserRoleClaimIds");
 
-            fb.WithOwner().HasForeignKey("UserId");
+            rc.WithOwner().HasForeignKey("UserId");
 
-            fb.HasKey("Id");
+            rc.HasKey("Id");
 
-            fb.Property(fib => fib.Value)
-                .ValueGeneratedNever()
-                .HasColumnName("FriendId");
+            rc.Property(i => i.Value)
+                .HasColumnName("UserRoleClaimId")
+                .ValueGeneratedNever();
         });
 
-        builder.Metadata.FindNavigation(nameof(User.FriendIds))!
+        builder.Metadata.FindNavigation(nameof(User.RoleClaimIds))!
             .SetPropertyAccessMode(PropertyAccessMode.Field);
     }
 
@@ -53,5 +54,19 @@ public class UserConfigurations : IEntityTypeConfiguration<User>
             .HasConversion(
                 id => id.Value,
                 value => RefreshTokenId.Create(value));
+
+        builder.OwnsOne(u => u.PersonalData, pd =>
+        {
+            pd.ToTable("UserPersonalData");
+
+            pd.HasKey(pd => pd.Id);
+
+            pd.Property(pd => pd.Id)
+                .ValueGeneratedNever()
+                .HasConversion(
+                    id => id.Value,
+                    Value => PersonalDataId.Create(Value));
+
+        });
     }
 }

@@ -17,12 +17,124 @@ namespace Pokemon.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.8")
+                .HasAnnotation("ProductVersion", "7.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Pokemon.Domain.PokemonAggregate.PocketMonster", b =>
+            modelBuilder.Entity("Pokemon.Domain.AuthenticationAggregates.RefreshToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedOnUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("Expires")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("ModifiedOnUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("Revoked")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("UserId");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("RefreshTokens", (string)null);
+                });
+
+            modelBuilder.Entity("Pokemon.Domain.AuthenticationAggregates.User", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedOnUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("FailedLogins")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Firstname")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("HashedPassword")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Lastname")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("LockedOut")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("LockoutEnd")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("ModifiedOnUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("RefreshTokenId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("RefreshTokenId");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("UserLockoutEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Users", (string)null);
+                });
+
+            modelBuilder.Entity("Pokemon.Domain.AuthenticationAggregates.UserRole", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedOnUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("ModifiedOnUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("UserId");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserRoles", (string)null);
+                });
+
+            modelBuilder.Entity("Pokemon.Domain.PocketMonsterAggregate.PocketMonster", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
@@ -69,77 +181,85 @@ namespace Pokemon.Infrastructure.Migrations
                     b.ToTable("Pokemons", (string)null);
                 });
 
-            modelBuilder.Entity("Pokemon.Domain.UserAggregate.RefreshToken", b =>
+            modelBuilder.Entity("Pokemon.Domain.AuthenticationAggregates.User", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
+                    b.OwnsOne("Pokemon.Domain.AuthenticationAggregates.Entities.PersonalData", "PersonalData", b1 =>
+                        {
+                            b1.Property<Guid>("Id")
+                                .HasColumnType("uuid");
 
-                    b.Property<DateTime>("CreatedOnUtc")
-                        .HasColumnType("timestamp with time zone");
+                            b1.Property<DateTime?>("BirthDay")
+                                .HasColumnType("timestamp with time zone");
 
-                    b.Property<DateTime>("Expires")
-                        .HasColumnType("timestamp with time zone");
+                            b1.Property<string>("Country")
+                                .HasColumnType("text");
 
-                    b.Property<DateTime>("ModifiedOnUtc")
-                        .HasColumnType("timestamp with time zone");
+                            b1.Property<DateTime>("CreatedOnUtc")
+                                .HasColumnType("timestamp with time zone");
 
-                    b.Property<bool>("Revoked")
-                        .HasColumnType("boolean");
+                            b1.Property<string>("Gender")
+                                .HasColumnType("text");
 
-                    b.Property<string>("Token")
-                        .IsRequired()
-                        .HasColumnType("text");
+                            b1.Property<DateTime>("ModifiedOnUtc")
+                                .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("UserId");
+                            b1.Property<string>("PhoneCountryCode")
+                                .HasColumnType("text");
 
-                    b.HasKey("Id");
+                            b1.Property<string>("PhoneNumber")
+                                .HasColumnType("text");
 
-                    b.ToTable("RefreshTokens", (string)null);
+                            b1.Property<string>("StreetAddress")
+                                .HasColumnType("text");
+
+                            b1.Property<Guid>("UserId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<int?>("ZipCode")
+                                .HasColumnType("integer");
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("UserId")
+                                .IsUnique();
+
+                            b1.ToTable("UserPersonalData", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("UserId");
+                        });
+
+                    b.OwnsMany("Pokemon.Domain.AuthenticationAggregates.ValueObjects.UserRoleClaimId", "RoleClaimIds", b1 =>
+                        {
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("integer");
+
+                            NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b1.Property<int>("Id"));
+
+                            b1.Property<Guid>("UserId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<Guid>("Value")
+                                .HasColumnType("uuid")
+                                .HasColumnName("UserRoleClaimId");
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("UserId");
+
+                            b1.ToTable("UserRoleClaimIds", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("UserId");
+                        });
+
+                    b.Navigation("PersonalData");
+
+                    b.Navigation("RoleClaimIds");
                 });
 
-            modelBuilder.Entity("Pokemon.Domain.UserAggregate.User", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedOnUtc")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Firstname")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("HashedPassword")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Lastname")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("ModifiedOnUtc")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("RefreshTokenId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("RefreshTokenId");
-
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Users", (string)null);
-                });
-
-            modelBuilder.Entity("Pokemon.Domain.PokemonAggregate.PocketMonster", b =>
+            modelBuilder.Entity("Pokemon.Domain.PocketMonsterAggregate.PocketMonster", b =>
                 {
                     b.OwnsMany("Pokemon.Domain.Common.PokemonAggregate.Entities.Ability", "Abilities", b1 =>
                         {
@@ -259,36 +379,6 @@ namespace Pokemon.Infrastructure.Migrations
                     b.Navigation("Moves");
 
                     b.Navigation("Stats");
-                });
-
-            modelBuilder.Entity("Pokemon.Domain.UserAggregate.User", b =>
-                {
-                    b.OwnsMany("Pokemon.Domain.UserAggregate.ValueObjects.UserId", "FriendIds", b1 =>
-                        {
-                            b1.Property<int>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("integer");
-
-                            NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b1.Property<int>("Id"));
-
-                            b1.Property<Guid>("UserId")
-                                .HasColumnType("uuid");
-
-                            b1.Property<Guid>("Value")
-                                .HasColumnType("uuid")
-                                .HasColumnName("FriendId");
-
-                            b1.HasKey("Id");
-
-                            b1.HasIndex("UserId");
-
-                            b1.ToTable("FriendIds", (string)null);
-
-                            b1.WithOwner()
-                                .HasForeignKey("UserId");
-                        });
-
-                    b.Navigation("FriendIds");
                 });
 #pragma warning restore 612, 618
         }

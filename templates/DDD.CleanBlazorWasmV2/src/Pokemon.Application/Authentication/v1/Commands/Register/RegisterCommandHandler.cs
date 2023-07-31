@@ -71,7 +71,9 @@ public class RegisterCommandHandler :
             command.Firstname,
             command.Lastname,
             command.Email,
-            hashedPassword
+            hashedPassword,
+            personalData: null,
+            roleClaimIds: new()
         );
         await _userRepository.AddAsync(user);
 

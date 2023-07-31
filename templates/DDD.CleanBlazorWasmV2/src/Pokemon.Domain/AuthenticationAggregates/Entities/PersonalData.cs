@@ -1,17 +1,20 @@
-using System.Reflection.Metadata;
 using Pokemon.Domain.AuthenticationAggregates.ValueObjects;
+using Pokemon.Domain.Common.Models;
 
 namespace Pokemon.Domain.AuthenticationAggregates.Entities;
 
-public sealed class PersonalData : Entity<PersonalDataId>
+public sealed class PersonalData : Entity<PersonalDataId>, IAuditableEntity
 {
     public string? Country { get; private set; }
     public string? StreetAddress { get; private set; }
     public int? ZipCode { get; private set; }
-    public string? Sex { get; private set; }
+    public string? Gender { get; private set; }
     public string? PhoneCountryCode { get; private set; }
     public string? PhoneNumber { get; private set; }
     public DateTime? BirthDay { get; private set; }
+
+    public DateTime CreatedOnUtc { get; set; }
+    public DateTime ModifiedOnUtc { get; set; }
 
     private PersonalData(
         string? country,
@@ -26,7 +29,7 @@ public sealed class PersonalData : Entity<PersonalDataId>
         Country = country;
         StreetAddress = streetAddress;
         ZipCode = zipCode;
-        Sex = sex;
+        Gender = sex;
         PhoneCountryCode = phoneCountryCode;
         PhoneNumber = phoneNumber;
         BirthDay = birthday;
@@ -51,5 +54,9 @@ public sealed class PersonalData : Entity<PersonalDataId>
             birthDay);
 
         return data;
+    }
+
+    private PersonalData()
+    {
     }
 }

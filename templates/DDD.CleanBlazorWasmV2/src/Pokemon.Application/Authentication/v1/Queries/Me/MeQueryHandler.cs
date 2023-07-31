@@ -50,7 +50,9 @@ public class MeQueryHandler : IRequestHandler<MeQuery, ErrorOr<AuthenticationRes
             firstname: "",
             lastname: "",
             email: "",
-            hashedPassword: "");
+            hashedPassword: "",
+            personalData: null,
+            roleClaimIds: new());
 
         return new AuthenticationResult(
             user,

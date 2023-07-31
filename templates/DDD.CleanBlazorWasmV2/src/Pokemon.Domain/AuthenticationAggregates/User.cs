@@ -2,11 +2,14 @@ using Pokemon.Domain.Common.Models;
 using Pokemon.Domain.AuthenticationAggregates.Events;
 using Pokemon.Domain.AuthenticationAggregates.ValueObjects;
 using Pokemon.Domain.AuthenticationAggregates.Entities;
+using System.Diagnostics.Contracts;
 
 namespace Pokemon.Domain.AuthenticationAggregates;
 
 public sealed class User : AggregateRoot<UserId, Guid>, IAuditableEntity
 {
+    private readonly List<UserRoleClaimId> _roleClaimIds = new();
+
     public string Username { get; private set; }
     public string Firstname { get; private set; }
     public string Lastname { get; private set; }
@@ -14,6 +17,14 @@ public sealed class User : AggregateRoot<UserId, Guid>, IAuditableEntity
     public string HashedPassword { get; private set; }
     public RefreshTokenId? RefreshTokenId { get; private set; }
     public PersonalData? PersonalData { get; private set; }
+    public bool EmailConfirmed { get; private set; } = false;
+    public bool TwoFactorEnabled { get; private set; } = false;
+    public bool UserLockoutEnabled { get; private set; } = false;
+    public bool LockedOut { get; private set; } = false;
+    public int FailedLogins { get; private set; }
+    public DateTime? LockoutEnd { get; private set; }
+
+    public IReadOnlyList<UserRoleClaimId> RoleClaimIds => _roleClaimIds.AsReadOnly();
 
     public DateTime CreatedOnUtc { get; set; }
     public DateTime ModifiedOnUtc { get; set; }
@@ -25,6 +36,7 @@ public sealed class User : AggregateRoot<UserId, Guid>, IAuditableEntity
         string email,
         string hashedPassword,
         PersonalData? personalData,
+        List<UserRoleClaimId> roleClaimIds,
         UserId userId = null!) : base(userId ?? UserId.CreateUnique())
     {
         Username = username;
@@ -33,6 +45,7 @@ public sealed class User : AggregateRoot<UserId, Guid>, IAuditableEntity
         Email = email;
         HashedPassword = hashedPassword;
         PersonalData = personalData;
+        _roleClaimIds = roleClaimIds;
     }
 
 
@@ -52,6 +65,7 @@ public sealed class User : AggregateRoot<UserId, Guid>, IAuditableEntity
         string lastname,
         string email,
         string hashedPassword,
+        List<UserRoleClaimId> roleClaimIds,
         PersonalData? personalData
         )
     {
@@ -61,7 +75,8 @@ public sealed class User : AggregateRoot<UserId, Guid>, IAuditableEntity
             lastname,
             email,
             hashedPassword,
-            personalData);
+            personalData,
+            roleClaimIds ?? new());
 
         user.AddDomainEvent(new UserCreated(user));
 
@@ -76,6 +91,63 @@ public sealed class User : AggregateRoot<UserId, Guid>, IAuditableEntity
     {
         RefreshTokenId = refreshTokenId;
     }
+
+
+    public void AddRoleClaim(UserRoleClaimId roleClaimId)
+    {
+        _roleClaimIds.Add(roleClaimId);
+    }
+
+
+    public void RemoveRoleClaim(UserRoleClaimId roleClaimId)
+    {
+        _roleClaimIds.Remove(roleClaimId);
+    }
+
+
+    public void HandleFailedUserLoginAttempts()
+    {
+        const int LockoutAttempts = 5;
+        const int LockoutMinutes = 1;
+
+
+        if (UserLockoutEnabled)
+        {
+            FailedLogins ++;
+        }
+
+        if (UserLockoutEnabled && FailedLogins >= LockoutAttempts)
+        {
+            LockedOut = true;
+            LockoutEnd = DateTime.UtcNow.AddMinutes(LockoutMinutes);
+        }
+    }
+
+
+    public void UnlockUser()
+    {
+        LockedOut = false;
+        LockoutEnd = null;
+        FailedLogins = 0;
+    }
+
+
+    public void CheckUserLockoutState()
+    {
+        var currentTime = DateTime.UtcNow;
+
+        HandleFailedUserLoginAttempts();
+
+        if (UserLockoutEnabled && LockedOut)
+        {
+            if(LockoutEnd < currentTime)
+            {
+                UnlockUser();
+            }
+        }
+    }
+
+
 
 #pragma warning disable CS8618
     private User()
