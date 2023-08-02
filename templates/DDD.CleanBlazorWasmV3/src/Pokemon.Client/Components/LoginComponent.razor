@@ -1,0 +1,75 @@
+@inject IAuthClient _authClient
+@inject AuthenticationStateProvider _authProvider
+@inject ILocalStorageService _localStorage
+@inject NavigationManager _navigationManager
+@inject ISnackbar _snackbar
+
+
+
+<MudForm class="mt-4" Model="@loginRequest" @ref="@form" @bind-IsValid="@success" ValidationDelay="0">
+
+    <MudPaper Class="pa-4">
+        <MudStack Justify="Justify.Center">
+            <MudTextField Label="Email" Class="mt-3" Immediate="true" HelperText="Enter your email"
+                        @bind-Value="loginRequest.Email" For="@(() => loginRequest.Email)" Required="true" RequiredError="Email is required"
+                        InputType="InputType.Email" />
+
+            <MudTextField Label="Password" HelperText="Enter your password" Class="mt-3" Immediate="true"
+                        @bind-Value="loginRequest.Password" For="@(() => loginRequest.Password)" InputType="InputType.Password" Required="true" RequiredError="Password is required"/>
+
+            <MudSwitch @bind-Checked="loginRequest.RememberMe" Label="Remember me" Color="Color.Primary" Class="mt-5"></MudSwitch>
+        </MudStack>
+    </MudPaper>
+    <MudPaper Class="pa-4">
+        <MudStack Justify="Justify.Center">
+            <MudButton Variant="Variant.Filled" Disabled="@(!success)" Color="Color.Primary" Class="m-auto"
+                        OnClick="@(async () => await Submit())">Login</MudButton>
+
+            <MudLink class="mt-5 mr-auto ml-auto" Href="/account/forgot-password">Forgot your password?</MudLink>
+
+            <MudDivider />
+
+            <MudButton Variant="Variant.Filled" Color="Color.Success" Class="m-auto"
+                        OnClick="@GoToRegister">Register</MudButton>
+        </MudStack>
+    </MudPaper>
+
+</MudForm>
+
+
+
+@code{
+    MudForm form = new MudForm();
+    LoginRequest loginRequest = new();
+    private ServiceResponse<AuthenticationResponse>? response { get; set; }
+    private AuthenticationResponse? authResult { get; set; }
+    bool success;
+
+    public void GoToRegister()
+    {
+        _navigationManager.NavigateTo("/account/register");
+    }
+
+    public async Task Submit()
+    {
+        await form.Validate();
+
+        if (form.IsValid)
+        {
+            response = await _authClient.LoginAsync(loginRequest);
+            if (response.Data is not null && response.StatusCode == 200)
+            {
+                _snackbar.Add("Successfully logged in", Severity.Success);
+                await _authProvider.GetAuthenticationStateAsync();
+                _navigationManager.NavigateTo("/", true);
+            }
+            else if (response is not null && response.StatusCode == 401)
+            {
+                _snackbar.Add($"Login failed - {response.Message}", Severity.Warning);
+            }
+            else {
+                _snackbar.Add("Critical Error - An unforseen error occured", Severity.Error);
+            }
+        }
+    }
+}

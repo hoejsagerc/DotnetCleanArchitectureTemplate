@@ -1,20 +1,15 @@
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
-using ErrorOr;
 using MapsterMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 using Pokemon.Application.Authentication.v1.Commands.Logout;
 using Pokemon.Application.Authentication.v1.Queries.Login;
 using Pokemon.Contracts.v1.Authentication;
 using Pokemon.Domain.AuthenticationAggregate;
 using Pokemon.Domain.Common.DomainErrors;
-using Pokemon.Infrastructure.Authentication;
 
 namespace Pokemon.Api.Controllers.v1.Authentication;
 
@@ -41,6 +36,7 @@ public class LoginController : ApiController
 
     [HttpPost("login")]
     [ProducesResponseType(typeof(AuthenticationResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
@@ -48,25 +44,14 @@ public class LoginController : ApiController
 
         var authResult = await _mediator.Send(query);
 
-        if(authResult.IsError && authResult.FirstError == Errors.User.InvalidCredentials)
+        if(authResult.IsError && (authResult.FirstError == Errors.User.InvalidCredentials
+            || authResult.FirstError == Errors.User.EmailNotConfirmed
+            || authResult.FirstError == Errors.User.UserLockedOut))
         {
             return Problem(
                 statusCode: StatusCodes.Status401Unauthorized,
                 title: authResult.FirstError.Description);
         }
-
-        var user = authResult.Value.User;
-
-        var claims = new[]
-        {
-            new Claim(ClaimTypes.Email, user.Email),
-            new Claim(ClaimTypes.NameIdentifier, user.Id),
-        };
-
-        var claimsIdentity = new ClaimsIdentity(claims, "serverAuth");
-        var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
-
-        await HttpContext.SignInAsync(claimsPrincipal);
 
         return authResult.Match(
             authResult => Ok(_mapper.Map<AuthenticationResponse>(authResult)),

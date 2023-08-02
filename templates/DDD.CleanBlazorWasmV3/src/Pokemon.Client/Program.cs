@@ -6,6 +6,7 @@ using Blazored.LocalStorage;
 using MudBlazor;
 using Microsoft.AspNetCore.Components.Authorization;
 using Pokemon.Client.Authentication;
+using Pokemon.Client.Services.v1.Authentication;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -26,6 +27,17 @@ builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStat
 builder.Services.AddHttpClient("BaseApiClient", options =>
 {
     options.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress);
+});
+
+
+builder.Services.AddScoped<IAuthClient>(sp =>
+{
+    var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
+    var httpClient = httpClientFactory.CreateClient("BaseApiClient");
+
+    var baseAddress = httpClient.BaseAddress?.ToString() ?? string.Empty;
+
+    return new AuthClientV1(baseAddress, httpClient);
 });
 
 

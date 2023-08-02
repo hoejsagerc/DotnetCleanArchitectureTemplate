@@ -2,11 +2,11 @@ using ErrorOr;
 using MediatR;
 using Pokemon.Application.Authentication.v1.Common;
 
-namespace Pokemon.Application.Authentication.v1.Queries.Login;
+namespace Pokemon.Application.Authentication.v1.Queries.Me;
 
-public record LoginQuery
+public record MeQuery
 (
     string Email,
-    string Password,
-    bool RememberMe
+    string GivenName,
+    string UserId
 ) : IRequest<ErrorOr<AuthenticationResult>>;

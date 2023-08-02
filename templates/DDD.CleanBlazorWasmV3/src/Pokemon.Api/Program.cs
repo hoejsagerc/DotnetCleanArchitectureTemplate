@@ -69,16 +69,14 @@ app.UseSerilogRequestLogging(options =>
         diagnosticContext.Set("RemoteIpAddress", httpContext.Connection.RemoteIpAddress);
     };
 });
-app.UseExceptionHandler("/errors");
 app.UseHttpsRedirection();
 app.UseRouting();
+// enable CORS
+app.UseCors("AllowFrontEnd");
 // enable Authentication & Authorization middleware
 app.UseAuthentication();
 app.UseAuthorization();
-
-// enable CORS
-app.UseCors("AllowFrontEnd");
-
+app.UseExceptionHandler("/errors");
 app.MapControllers();
 app.UseHsts();
 app.UseBlazorFrameworkFiles();

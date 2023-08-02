@@ -1,4 +1,4 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
 @inject AuthenticationStateProvider _authProvider
 @inject IAuthClient _authClient
 @inject NavigationManager _navigationManager
@@ -29,12 +29,14 @@
     </MudAppBar>
     <MudDrawer ClipMode="DrawerClipMode.Always" @bind-Open="_drawerOpen" Elevation="1">
         <MudDrawerHeader>
-            <MudText Typo="Typo.h6">Pokemon</MudText>
+            <MudText Typo="Typo.h6">Manage Account</MudText>
         </MudDrawerHeader>
-        <NavMenu />
+        <IdentityNavMenu />
     </MudDrawer>
     <MudMainContent>
-        @Body
+        <MudContainer>
+            @Body
+        </MudContainer>
     </MudMainContent>
 </MudLayout>
 
@@ -45,6 +47,7 @@
     {
         _drawerOpen = !_drawerOpen;
     }
+
     private async Task Logout()
     {
         await _authClient.LogoutAsync();

@@ -39,7 +39,21 @@ public class LoginQueryHandler : IRequestHandler<LoginQuery, ErrorOr<Authenticat
     {
         string? sourceIpAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
 
-        var loginResult = await _signInManager.PasswordSignInAsync(query.Email, query.Password, false, false);
+        var user = await _userManager.FindByEmailAsync(query.Email);
+        var emailConfimed = await _userManager.IsEmailConfirmedAsync(user);
+
+        if (!emailConfimed)
+        {
+            _logger.LogError(
+                "Login Failed - Email not confirmed, {@UserEmail}, {@sourceIpAddress}, {@EmailConfirmed}, {@DateTimUtc}",
+                query.Email,
+                sourceIpAddress,
+                emailConfimed,
+                DateTime.UtcNow);
+            return Errors.User.EmailNotConfirmed;
+        }
+
+        var loginResult = await _signInManager.PasswordSignInAsync(query.Email, query.Password, query.RememberMe, true);
 
         if(!loginResult.Succeeded)
         {
@@ -51,10 +65,14 @@ public class LoginQueryHandler : IRequestHandler<LoginQuery, ErrorOr<Authenticat
                 loginResult.IsNotAllowed,
                 loginResult.RequiresTwoFactor,
                 DateTime.UtcNow);
+
+            if (loginResult.IsLockedOut)
+            {
+                return Errors.User.UserLockedOut;
+            }
+
             return Errors.User.InvalidCredentials;
         }
-
-        var user = await _userManager.FindByEmailAsync(query.Email);
 
         var jwtToken = _jwtTokenGenerator.GenerateToken(user);
 

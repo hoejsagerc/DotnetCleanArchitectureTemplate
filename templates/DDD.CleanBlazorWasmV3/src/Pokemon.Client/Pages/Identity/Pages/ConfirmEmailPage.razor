@@ -1,0 +1,46 @@
+@page "/account/confirm-email"
+@inject NavigationManager _navManager
+
+
+<PageTitle>Confirm Email</PageTitle>
+
+<MudText Typo="Typo.h4">Confirm Email Address</MudText>
+
+<MudText>UserId: @UserId</MudText>
+<MudText>Code: @Code</MudText>
+
+
+
+@code {
+    [Parameter]
+    public string UserId { get; set; } = string.Empty;
+
+    [Parameter]
+    public string Code { get; set; } = string.Empty;
+
+    protected async override Task OnParametersSetAsync()
+    {
+
+        var uri = new Uri(_navManager.Uri);
+        var queryParameters = System.Web.HttpUtility.ParseQueryString(uri.Query);
+        UserId = queryParameters["userId"]!;
+        Code = queryParameters["code"]!;
+
+        @* if (string.IsNullOrEmpty(UserId) || string.IsNullOrEmpty(Code))
+        {
+            await Task.CompletedTask;
+            _navManager.NavigateTo("/");
+        } *@
+
+        @* var user = _client.FindByIdAsync(userId);
+        if (user is null)
+        {
+            // send snackbar error that user with id was not found
+        } *@
+
+        // if the user is not null, then resent the code to the api which will decode the code
+        // and run _userManager.ConfirmEmailAsync(user, code)
+        // if the api client returns a 200 then a success status message can be displayed on the page
+    }
+
+}

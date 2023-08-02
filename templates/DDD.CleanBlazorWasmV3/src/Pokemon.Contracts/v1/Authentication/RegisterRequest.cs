@@ -19,4 +19,12 @@ public class RegisterRequest
     [Display(Name = "Confirm Password")]
     [Compare("Password", ErrorMessage = "The password and confirmations passwords do not match.")]
     public string ConfirmPassword { get; set; } = string.Empty;
+
+    [DataType(DataType.Text)]
+    [Display(Name = "Users Given name")]
+    public string GivenName { get; set; } = string.Empty;
+
+    [DataType(DataType.Text)]
+    [Display(Name = "Users Surname")]
+    public string Surname { get; set; } = string.Empty;
 }

@@ -25,5 +25,17 @@ public static partial class Errors
         public static Error InvalidCredentials => Error.Validation(
             code: "User.InvalidCredential",
             description: "Invalid Credential");
+
+        public static Error UserLockedOut => Error.Validation(
+            code: "User.UserLockedOut",
+            description: "User is locked out");
+
+        public static Error EmailVerificationFailed => Error.Validation(
+            code: "User.EmailVerificationFailed",
+            description: "Email verification failed");
+
+        public static Error EmailNotConfirmed => Error.Validation(
+            code: "User.EmailNotConfirmed",
+            description: "User has not confirmed email address");
     }
 }

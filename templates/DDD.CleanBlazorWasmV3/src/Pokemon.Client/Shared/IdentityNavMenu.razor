@@ -1,0 +1,30 @@
+@inject IAuthClient _authClient
+@inject NavigationManager _navigationManager
+@inject AuthenticationStateProvider _authProvider
+
+<MudNavMenu>
+    <MudNavLink Class="mb-3" Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
+    <AuthorizeView>
+        <Authorized>
+            <MudNavLink Class="mb-3" Href="account/manage/Overview" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.SpaceDashboard">Overview</MudNavLink>
+            <MudNavLink Class="mb-3" Href="account/manage/profile" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AccountCircle">Profile</MudNavLink>
+            <MudNavLink Class="mb-3" Href="account/manage/email" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Email">Email</MudNavLink>
+            <MudNavLink Class="mb-3" Href="account/manage/password" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Password">Password</MudNavLink>
+            <MudNavLink Class="mb-3" Href="account/manage/two-factor" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Security">Two-factor authentication</MudNavLink>
+            <MudNavLink Class="mb-3" Href="account/manage/personal-data" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.ContactMail">Personal data</MudNavLink>
+            <MudNavLink Class="mb-3" OnClick="@Logout" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Logout">Sign out</MudNavLink>
+        </Authorized>
+        <NotAuthorized>
+            <MudNavLink Class="mb-3" Href="" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Login">Sign in</MudNavLink>
+        </NotAuthorized>
+    </AuthorizeView>
+</MudNavMenu>
+
+@code {
+    private async Task Logout()
+    {
+        await _authClient.LogoutAsync();
+        _navigationManager.NavigateTo("/", true);
+        await _authProvider.GetAuthenticationStateAsync();
+    }
+}

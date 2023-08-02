@@ -3,7 +3,6 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
-using Pokemon.Application.Authentication.v1.Common;
 using Pokemon.Domain.AuthenticationAggregate;
 using Pokemon.Domain.Common.DomainErrors;
 
@@ -43,11 +42,11 @@ public class LogoutCommandHandler : IRequestHandler<LogoutCommand, ErrorOr<strin
         }
 
 
-            _logger.LogInformation(
-                "User Logout Successful - User logged out {@UserId}, {@SourceIpAddress}, {@DateTimeUtc}",
-                command.UserId,
-                sourceIpAddress,
-                DateTime.UtcNow);
+        _logger.LogInformation(
+            "User Logout Successful - User logged out {@UserId}, {@SourceIpAddress}, {@DateTimeUtc}",
+            command.UserId,
+            sourceIpAddress,
+            DateTime.UtcNow);
 
         return "";
     }

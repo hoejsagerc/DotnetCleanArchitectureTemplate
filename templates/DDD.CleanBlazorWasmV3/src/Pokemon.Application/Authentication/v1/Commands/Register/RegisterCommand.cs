@@ -8,5 +8,7 @@ public record RegisterCommand
 (
     string Username,
     string Email,
-    string Password
+    string Password,
+    string GivenName,
+    string Surname
 ) : IRequest<ErrorOr<AuthenticationResult>>;
