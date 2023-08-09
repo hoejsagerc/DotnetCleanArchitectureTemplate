@@ -1,6 +1,8 @@
 using Mapster;
 using Microsoft.Data.SqlClient;
 using Pokemon.Application.Authentication.v1.Commands.Register;
+using Pokemon.Application.Authentication.v1.Commands.UpdatePassword;
+using Pokemon.Application.Authentication.v1.Commands.UpdateUser;
 using Pokemon.Application.Authentication.v1.Commands.VerifyEmail;
 using Pokemon.Application.Authentication.v1.Common;
 using Pokemon.Application.Authentication.v1.Queries.Me;
@@ -18,6 +20,14 @@ public class AccountsMappingConfig : IRegister
             .Map(dest => dest.Email, src => src.Email)
             .Map(dest => dest.GivenName, src => src.GivenName)
             .Map(dest => dest.UserId, src => src.UserId);
+
+        config.NewConfig<(UpdateUserRequest Request, string UserId), UpdateUserEmailCommand>()
+            .Map(dest => dest.Id, src => src.UserId)
+            .Map(dest => dest.Email, src => src.Request.Email);
+
+        config.NewConfig<(UpdateUserRequest Request, string UserId), UpdateUserPasswordCommand>()
+            .Map(dest => dest.Id, src => src.UserId)
+            .Map(dest => dest.Password, src => src.Request.Password);
 
         config.NewConfig<VerifyEmailRequest, VerifyEmailCommand>();
 

@@ -1,0 +1,55 @@
+@inject IAuthClient _authClient
+@inject AuthenticationStateProvider _authProvider
+@inject ILocalStorageService _localStorage
+@inject NavigationManager _navigationManager
+@inject ISnackbar _snackbar
+
+
+<MudForm class="mt-4" Model="@updateUserRequest" @ref="@form" @bind-IsValid="@success" ValidationDelay="0">
+
+    <MudPaper Class="pa-4">
+        <MudStack Justify="Justify.Center">
+            <MudTextField Label="Email" Class="mt-3" Immediate="true" HelperText="Enter your email"
+                        @bind-Value="updateUserRequest.Email" For="@(() => updateUserRequest.Email)" Required="true" RequiredError="Email is required"
+                        InputType="InputType.Email" />
+
+        </MudStack>
+    </MudPaper>
+    <MudPaper Class="pa-4">
+        <MudStack Justify="Justify.Center">
+            <MudButton Variant="Variant.Filled" Disabled="@(!success)" Color="Color.Primary" Class="m-auto"
+                        OnClick="@(async () => await Submit())">Update</MudButton>
+        </MudStack>
+    </MudPaper>
+
+</MudForm>
+
+
+
+@code {
+    MudForm form = new MudForm();
+    bool success;
+    UpdateUserRequest updateUserRequest = new();
+    private ServiceResponse<AuthenticationResponse>? response { get; set; }
+    private AuthenticationResponse? authResult { get; set; }
+
+    public async Task Submit()
+    {
+        await form.Validate();
+
+        if (form.IsValid)
+        {
+            response = await _authClient.UpdateEmailAsync(updateUserRequest);
+
+            if (response.StatusCode == 204)
+            {
+                _snackbar.Add("sucessfully changed email address", Severity.Success);
+                await _authProvider.GetAuthenticationStateAsync();
+                _navigationManager.NavigateTo("/", true);
+            }
+            else {
+                _snackbar.Add("Critical Error - An unforseen error occured", Severity.Error);
+            }
+        }
+    }
+}

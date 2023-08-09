@@ -7,13 +7,12 @@
 @using System.ComponentModel.DataAnnotations
 
 
-<MudCard>
-    <MudForm Model="@registerRequest" @ref="@form" ValidationDelay="0" @bind-IsValid="@success" @bind-Errors="@errors">
-        <MudCardContent>
-                @* <MudTextField Label="Username"
-                            @bind-Value="registerRequest.Username" For="@(() => registerRequest.Username)"
-                            Immediate="true" Required="true" RequiredError="User name is required!" /> *@
 
+
+<MudForm Class="mt-4" Model="@registerRequest" @ref="@form" ValidationDelay="0" @bind-IsValid="@success" @bind-Errors="@errors">
+
+    <MudPaper Class="pa-4">
+        <MudStack Justify="Justify.Center">
                 <MudTextField Label="Firstname" Class="mt-3"
                             @bind-Value="registerRequest.GivenName" For="@(() => registerRequest.GivenName)"
                             Immediate="true" Required="true" RequiredError="Users firstname is required" />
@@ -21,10 +20,6 @@
                 <MudTextField Label="Lastname" Class="mt-3"
                             @bind-Value="registerRequest.Surname" For="@(() => registerRequest.Surname)"
                             Immediate="true" Required="true" RequiredError="Users lastname is required!" />
-
-                @* <MudTextField Label="Lastname" Class="mt-3"
-                            @bind-Value="registerRequest.Lastname" For="@(() => registerRequest.Lastname)"
-                            Immediate="true" Required="true" RequiredError="User name is required!" /> *@
 
                 <MudTextField Label="Email" Class="mt-3"
                             @bind-Value="registerRequest.Email" For="@(() => registerRequest.Email)"
@@ -37,14 +32,24 @@
                 <MudTextField Label="Password" HelperText="Repeat the password" Class="mt-3" Validation="@(new Func<string, string>(PasswordMatch))"
                             @bind-Value="registerRequest.ConfirmPassword" For="@(() => registerRequest.Password)" InputType="InputType.Password"
                             Immediate="true" Required="true" RequiredError="Password is required"/>
+        </MudStack>
+    </MudPaper>
 
+    <MudPaper Class="pa-4">
+        <MudStack Justify="Justify.Center">
+            <MudButton Variant="Variant.Filled" Disabled="@(!success)" Color="Color.Primary" Class="m-auto"
+                OnClick="@(async () => await Submit())">Register</MudButton>
 
-        </MudCardContent>
-        <MudCardActions>
-            <MudButton Variant="Variant.Filled" Disabled="@(!success)" Color="Color.Primary" Class="ml-auto" OnClick="@(async () => await Submit())">Register</MudButton>
-        </MudCardActions>
-    </MudForm>
-</MudCard>
+            <MudDivider />
+
+            <MudText Class="mt-5 m-auto">Already have an account?</MudText>
+            <MudButton Variant="Variant.Filled" Color="Color.Success" Class="m-auto"
+                OnClick="@GoToLogin"Login>Sign in</MudButton>
+        </MudStack>
+    </MudPaper>
+
+</MudForm>
+
 
 
 @code{
@@ -99,5 +104,10 @@
             return "Passwords don't match";
         }
         return null;
+    }
+
+    public void GoToLogin()
+    {
+        _navigationManager.NavigateTo("/account/login");
     }
 }

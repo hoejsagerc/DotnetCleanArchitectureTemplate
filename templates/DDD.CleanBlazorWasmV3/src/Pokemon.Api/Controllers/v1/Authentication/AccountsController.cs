@@ -2,9 +2,12 @@ using System.Security.Claims;
 using ErrorOr;
 using MapsterMapper;
 using MediatR;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Pokemon.Application.Authentication.v1.Commands.Register;
+using Pokemon.Application.Authentication.v1.Commands.UpdatePassword;
+using Pokemon.Application.Authentication.v1.Commands.UpdateUser;
 using Pokemon.Application.Authentication.v1.Commands.VerifyEmail;
 using Pokemon.Application.Authentication.v1.Common;
 using Pokemon.Application.Authentication.v1.Queries.Me;
@@ -61,7 +64,6 @@ public class AccountsController : ApiController
     [ProducesResponseType(typeof(AuthenticationResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> Me()
     {
-        //! somehow the correct claims are not comming in. might be an issue with the login claims thingy...
         var email = string.Empty;
         var givenName = string.Empty;
         var userId = string.Empty;
@@ -78,6 +80,50 @@ public class AccountsController : ApiController
 
         return result.Match(
             result => Ok(_mapper.Map<AuthenticationResponse>(result)),
+            errors => Problem(errors));
+    }
+
+
+    [HttpPut("email")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> UpdateEmail([FromBody] UpdateUserRequest request)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (request.Email is null)
+        {
+            return Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Email must not be null");
+        }
+        var command = _mapper.Map<UpdateUserEmailCommand>((request, userId));
+        var authResult = await _mediator.Send(command);
+
+        return authResult.Match(
+            authResult => NoContent(),
+            errors => Problem(errors));
+    }
+
+
+    [HttpPut("password")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> UpdatePassword([FromBody] UpdateUserRequest request)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (request.Password is null)
+        {
+            return Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Password must not be null");
+        }
+        var command = _mapper.Map<UpdateUserPasswordCommand>((request, userId));
+        var authResult = await _mediator.Send(command);
+
+        return authResult.Match(
+            authResult => NoContent(),
             errors => Problem(errors));
     }
 }

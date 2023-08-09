@@ -345,4 +345,131 @@ public class AuthClientV1 : IAuthClient
 
         return serviceResponse;
     }
+
+    public async Task<ServiceResponse<AuthenticationResponse>> UpdateEmailAsync(UpdateUserRequest body)
+    {
+        var urlBuilder_ = new System.Text.StringBuilder();
+        urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/api/v1/auth/account/email");
+
+        var client_ = _httpClient;
+        var serviceResponse = new ServiceResponse<AuthenticationResponse>()
+        {
+            Data = null,
+            StatusCode = 0,
+            Message = "Failed"
+        };
+        var disposeClient_ = false;
+        try {
+            using var request_ = new HttpRequestMessage();
+            var json = JsonSerializer.Serialize(body);
+            var content = new StringContent(json);
+            content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+            request_.Content = content;
+            request_.Method = new HttpMethod("PUT");
+            request_.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
+
+            var url = urlBuilder_.ToString();
+            request_.RequestUri = new Uri(url, UriKind.RelativeOrAbsolute);
+
+            var response_ = await client_.SendAsync(
+                request_,
+                HttpCompletionOption.ResponseContentRead).ConfigureAwait(false);
+
+            var disposeResponse_ = true;
+            try
+            {
+                var status = (int)response_.StatusCode;
+                if (status == 204)
+                {
+                    serviceResponse.StatusCode = status;
+                    serviceResponse.Message = "Success";
+                }
+                else {
+                    var problemDetails = await response_.Content.ReadFromJsonAsync<ProblemDetails>();
+                    serviceResponse.StatusCode = status;
+                    serviceResponse.Message = problemDetails!.Title;
+                }
+            }
+            finally
+            {
+                if (disposeResponse_)
+                {
+                    response_.Dispose();
+                }
+            }
+        }
+        finally
+        {
+            if (disposeClient_)
+            {
+                client_.Dispose();
+            }
+        }
+
+        return serviceResponse;
+    }
+
+    public async Task<ServiceResponse<AuthenticationResponse>> UpdatePasswordAsync(UpdateUserRequest body)
+    {
+        var urlBuilder_ = new System.Text.StringBuilder();
+        urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/api/v1/auth/account/password");
+
+        var client_ = _httpClient;
+        var serviceResponse = new ServiceResponse<AuthenticationResponse>()
+        {
+            Data = null,
+            StatusCode = 0,
+            Message = "Failed"
+        };
+        var disposeClient_ = false;
+        try {
+            using var request_ = new HttpRequestMessage();
+            var json = JsonSerializer.Serialize(body);
+            var content = new StringContent(json);
+            content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+            request_.Content = content;
+            request_.Method = new HttpMethod("PUT");
+            request_.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
+
+            var url = urlBuilder_.ToString();
+            request_.RequestUri = new Uri(url, UriKind.RelativeOrAbsolute);
+
+            var response_ = await client_.SendAsync(
+                request_,
+                HttpCompletionOption.ResponseContentRead).ConfigureAwait(false);
+
+            var disposeResponse_ = true;
+            try
+            {
+                var status = (int)response_.StatusCode;
+                if (status == 204)
+                {
+                    serviceResponse.StatusCode = status;
+                    serviceResponse.Message = "Success";
+                }
+                else {
+                    var problemDetails = await response_.Content.ReadFromJsonAsync<ProblemDetails>();
+                    serviceResponse.StatusCode = status;
+                    serviceResponse.Message = problemDetails!.Title;
+                }
+            }
+            finally
+            {
+                if (disposeResponse_)
+                {
+                    response_.Dispose();
+                }
+            }
+        }
+        finally
+        {
+            if (disposeClient_)
+            {
+                client_.Dispose();
+            }
+        }
+
+        return serviceResponse;
+
+    }
 }

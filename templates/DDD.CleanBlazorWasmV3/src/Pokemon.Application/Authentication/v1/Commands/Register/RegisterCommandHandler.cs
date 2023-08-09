@@ -43,7 +43,7 @@ public class RegisterCommandHandler :
 
         if(existingUser is not null)
         {
-            _logger.LogWarning("User registration failed - Email address already exists, {@UserEmail}, {@SourceIpAddress}, {@DateTimeUtc}",
+            _logger.LogError("User registration failed - Email address already exists, {@UserEmail}, {@SourceIpAddress}, {@DateTimeUtc}",
                 command.Email, sourceIpAddress, DateTime.UtcNow);
             return Errors.User.DuplicateEmail;
         }

@@ -18,6 +18,10 @@ public static partial class Errors
             code: "User.FailedCreating",
             description: "Unexpected error while creating new user in database");
 
+        public static Error FailedUpdating => Error.Unexpected(
+            code: "User.FailedUpdating",
+            description: "Unexpected error while updating user in database");
+
         public static Error PasswordValidationFailed => Error.Validation(
             code: "User.PasswordValidationFailed",
             description: "Password validation failed");
