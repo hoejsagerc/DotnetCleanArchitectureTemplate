@@ -1,0 +1,6 @@
+﻿namespace dotnet8template.Application.Common.Interfaces;
+
+public interface IUser
+{
+    string? Id { get; }
+}
