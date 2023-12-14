@@ -1,0 +1,48 @@
+{
+    "$schema": "http://json.schemastore.org/template",
+    "author": "Christian Højsager",
+    "classifications": [
+        "Web",
+        "ASP.NET Core",
+        "ASP.NET Core Web Api"
+    ],
+    "identity": "hoejsagerc.webapi",
+    "name": "DDD Clean Architecture Controller Web Api",
+    "description": "A controller based Web Api project with DDD Clean Architecture.",
+    "shortName": "ddd.webapi",
+    "sourceName": "BudgetTracker",
+    "symbols": {
+        "skipRestore": {
+            "type": "parameter",
+            "datatype": "bool",
+            "description": "Skips the restore of the solution when creating the project.",
+            "defaultValue": "false"
+        },
+        "framework": {
+            "type": "parameter",
+            "description": "Choose the framework for the project.",
+            "datatype": "choice",
+            "choices": [
+                {
+                    "choice": "net8.0",
+                    "description": ".NET 6.0"
+                }
+            ],
+            "defaultValue": "net8.0",
+            "replaces": "{TargetFramework}"
+        }
+    },
+    "sources": [
+        {
+            "modifiers": [
+                {
+                    "exclude": [
+                        ".vs/**",
+                        ".vscode/**",
+                        ".idea/**"
+                    ]
+                }
+            ]
+        }
+    ]
+}

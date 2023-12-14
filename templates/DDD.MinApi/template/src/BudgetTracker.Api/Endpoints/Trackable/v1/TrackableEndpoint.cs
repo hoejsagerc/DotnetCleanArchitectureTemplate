@@ -24,6 +24,7 @@ public static class TrackableEndpoints
                 .Build();
         
         var group = app.MapGroup("/api/v{version:apiVersion}")
+            .WithTags("Trackables")
             .WithApiVersionSet(versionSet);
 
 
